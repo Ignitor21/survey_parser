@@ -4,6 +4,8 @@ import os
 def generate_graph_numbers(statistic : dict, total_amount : int, title : str, filename : str):
     # Создание столбчатой диаграммы
     categories = list(statistic.keys())
+    if all(type(item) == str for item in categories):
+        categories = [cat.replace(' ', '\n') for cat in categories]
     values = list(statistic.values())
     plt.figure(figsize=(16, 9)) 
     bars = plt.bar(categories, values, color = 'RoyalBlue', width = 0.5)

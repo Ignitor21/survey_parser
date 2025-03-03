@@ -12,7 +12,7 @@ class teacher:
         self.marks = {}
         self.comments = []
     
-    def parse_questions(self):
+    def parse_questions_impl(self, question : str):
         pass
 
     def parse_marks(self):
@@ -29,15 +29,15 @@ class lecturer(teacher):
         for column_index in range(self.start_column, self.end_column + 1):
             question_answers = 0
             #import pdb; pdb.set_trace()
-            question = self.sheet.cell(1, column_index).value
+            cur_question = self.sheet.cell(1, column_index).value
 
-            if question.startswith("Посещали ли Вы лекции?"):
+            if cur_question.startswith("Посещали ли Вы лекции?"):
                 row_number = 2
                 for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):
                     if (row[0] is not None) and (self.sheet.cell(row_number, self.start_column).value == self.name):
                         question_answers += 1
                     row_number += 1
-                questions_statistic[question] = question_answers
+                questions_statistic[cur_question] = question_answers
         self.questions = questions_statistic
     
     def print_questions(self):
@@ -51,9 +51,9 @@ class lecturer(teacher):
         for column_index in range(self.start_column, self.end_column + 1):
             question_answers = 0
             #import pdb; pdb.set_trace()
-            question = self.sheet.cell(1, column_index).value
+            cur_question = self.sheet.cell(1, column_index).value
 
-            if question.startswith("Оцените качество преподавания лекций"):
+            if cur_question.startswith("Оцените качество преподавания лекций"):
                 row_number = 2
                 for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):
                     cur_lecturer_name = self.sheet.cell(row_number, self.start_column).value
@@ -66,7 +66,7 @@ class lecturer(teacher):
                             questions_statistic[cell_value] = 1
 
                     row_number += 1
-                self.marks[question] = dict(sorted(questions_statistic.items()))
+                self.marks[cur_question] = dict(sorted(questions_statistic.items()))
 
     def print_marks(self):
         for elem in self.marks:
@@ -76,7 +76,6 @@ class lecturer(teacher):
         questions_answers = []
 
         column_index = self.end_column
-        question = self.sheet.cell(1, column_index).value
 
         row_number = 2
         for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):

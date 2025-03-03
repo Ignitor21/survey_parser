@@ -2,42 +2,18 @@ import openpyxl
 from collections import defaultdict
 
 class statgen:
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, first_column : int, end_column : int):
         self.file_path = file_path
         self.workbook = openpyxl.load_workbook(filename=file_path)
         self.sheet = self.workbook.active
-        self.categories = set()
-
-    def parse(self):
-
-        # Словарь для хранения подсчётов по столбцам
-        column_counts = defaultdict(lambda: defaultdict(int))
-
-        # Проход по строкам и столбцам
-        for row in self.sheet.iter_rows(values_only=True):  # Итерируемся по строкам
-            for col_idx, cell_value in enumerate(row):  # Итерируемся по ячейкам в строке
-                if cell_value is not None:  # Игнорируем пустые ячейки
-                    column_counts[col_idx][cell_value] += 1
-
-        # # Вывод результатов
-        # for col_idx, counts in column_counts.items():
-        #     print(f"Столбец {col_idx + 1}:")
-        #     for value, count in counts.items():
-        #         print(f"  {value}: {count} раз(а)")
-        #     print()
-
-    def find_categories(self):
-
-        # Проход по ячейкам первой строки
-        for cell in self.sheet[1]:  # sheet[1] возвращает первую строку
-            if cell.value is not None:  # Игнорируем пустые ячейки
-                self.categories.add(cell.value)
-
-        print(self.categories)
+        self.total_answers = self.sheet.max_row - 1
+        self.first_column = first_column
+        self.end_column = end_column
+        self.general = {}
 
     def get_statistic_in_column(self, column_number : int):
         value_counts = {}
-
+        title = self.sheet.cell(1, column_number).value
         # Проход по ячейкам столбца, начиная со второй строки
         for row in self.sheet.iter_rows(min_row=2, min_col=column_number, max_col=column_number, values_only=True):
             cell_value = row[0]  # row[0] — значение ячейки в текущем столбце
@@ -50,15 +26,55 @@ class statgen:
                     value_counts[cell_value] = 1
 
         sorted_value_counts = dict(sorted(value_counts.items()))
-        return sorted_value_counts
-    
-    def print_column_statistic(self, column_number : int):
-        name = self.sheet.cell(1, column_number).value
-        distribution = self.get_statistic_in_column(column_number)
-        print(f"{name}\n{distribution}\n")
+        return title, sorted_value_counts
 
-    TEACHER_TYPES = ["Лектор", "Семинарист", "Преподаватель по лабораторным работам"]
+    def parse_columns(self, start_column_number : int, end_column_number : int):
+        for i in range(start_column_number, end_column_number + 1):
+            title, stat = self.get_statistic_in_column(i)
+            self.general[title] = stat
+
+    def parse_and_join_columns(self, start_column_number : int, end_column_number : int):
+        accum = {}
+        for i in range(start_column_number, end_column_number + 1):
+            title, stat = self.get_statistic_in_column(i)
+            for key, value in stat.items():
+                accum[key] = value
+        title = title.split('/')[0]
+        self.general[title] = accum
+   
+    def find_all_teachers(self, teacher_type : str):
+        teacher_column = None
+        for cell in self.sheet[1]:  # Проходим по первой строке (заголовки)
+            if cell.value == teacher_type:
+                teacher_column = cell.column_letter  # Получаем букву столбца
+                break
+
+        if teacher_column is None:
+            raise ValueError(f"Столбец {teacher_type} не найден в первой строке файла.")
+
+        # Сбор уникальных значений из столбца
+        unique_teachers = set()
+        for row in self.sheet.iter_rows(min_row=2, min_col=cell.column, max_col=cell.column, values_only=True):
+            if row[0]:  # Проверяем, что ячейка не пустая
+                unique_teachers.add(row[0])
+
+        return list(unique_teachers)
+
+    def find_teacher_columns(self, teacher_type : str):
+        for cell in self.sheet[1]:  # sheet[1] — первая строка
+            if cell.value == teacher_type:
+                teacher_type_column = cell.column  # Номер столбца
+            elif cell.value.startswith("Ваш комментарий о"):
+                comment_column = cell.column  # Номер столбца
+                break
+
+        return teacher_type_column, comment_column
 
 
-#    def get_teacher_statistic(self, name : str, start_column : int, end_column : int):
-        
+    def parse_teachers(self, teacher_type : str):
+        TEACHER_TYPES = ["Лектор", "Семинарист", "Преподаватель по лабораторным работам"]
+        if teacher_type not in TEACHER_TYPES:
+            raise Exception("Неправильный тип преподавателя")
+
+        teachers = self.find_all_teachers(teacher_type)
+        teacher_start, teacher_end = self.find_teacher_columns(teacher_type)
