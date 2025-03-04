@@ -96,30 +96,30 @@ class statgen:
             cur_lecturer.parse_questions()
             cur_lecturer.print_marks()
             cur_lecturer.print_questions()
-            i = 10
+            i = 0
             #import pdb; pdb.set_trace()
             for key, value in cur_lecturer.marks.items(): 
-                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"{i}")
+                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"lecturer-marks-{name}-{i}")
                 i += 1
 
-            i = 20
+            i = 0
             for key, value in cur_lecturer.questions.items():    
-                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"{i}")
+                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"lecturer-questions-{name}-{i}")
                 i += 1
 
     def parse_and_graph_seminarists(self):
         seminarist_start, seminarist_end = self.find_teacher_columns("Семинарист")
         self.find_teachers_by_type("Семинарист")
 
-        i = 30
         for name in self.seminarists:
             cur_seminarist = teacher.seminarist(self.sheet, seminarist_start, seminarist_end, name)
             print(name)
             cur_seminarist.parse_marks()
             cur_seminarist.print_marks()
            # import pdb; pdb.set_trace()
+            i = 0
             for key, value in cur_seminarist.marks.items():    
-                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"{i}")
+                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"seminarists-marks-{name}-{i}")
                 i += 1
 
     def parse_teachers(self, teacher_type : str):
