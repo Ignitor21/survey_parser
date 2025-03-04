@@ -74,7 +74,6 @@ class statgen:
         teacher_type_column = 0
         comment_column = 0
         for i in range(self.first_column, self.end_column + 1):# sheet[1] — первая строка
-            print(self.sheet.cell(1, i).value)
             if self.sheet.cell(1, i).value == teacher_type:
                 teacher_type_column = i  # Номер столбца
             elif self.sheet.cell(1, i).value.startswith("Ваш комментарий о") and teacher_type_column != 0:
@@ -82,22 +81,25 @@ class statgen:
                 break
 
         if (teacher_type_column == 0 or comment_column == 0):
-            raise Exception(f"Столбец {teacher_type} не найден")
+            raise Exception(f"Столбец \"{teacher_type}\" не найден")
         return teacher_type_column, comment_column
 
     def parse_and_graph_lecturers(self):
-        lecturer_start, lecturer_end = self.find_teacher_columns("Лектор")
+        try:
+            lecturer_start, lecturer_end = self.find_teacher_columns("Лектор")
+        except Exception as e:
+            print(f"{e}")
+            return
+
         self.find_teachers_by_type("Лектор")
 
         for name in self.lecturers:
             cur_lecturer = teacher.lecturer(self.sheet, lecturer_start, lecturer_end, name)
-            print(name)
             cur_lecturer.parse_marks()
             cur_lecturer.parse_questions()
-            cur_lecturer.print_marks()
-            cur_lecturer.print_questions()
+            #cur_lecturer.print_marks()
+            #cur_lecturer.print_questions()
             i = 0
-            #import pdb; pdb.set_trace()
             for key, value in cur_lecturer.marks.items(): 
                 graph_gen.generate_graph_numbers(value, self.total_answers, key, f"lecturer-marks-{name}-{i}")
                 i += 1
@@ -108,18 +110,39 @@ class statgen:
                 i += 1
 
     def parse_and_graph_seminarists(self):
-        seminarist_start, seminarist_end = self.find_teacher_columns("Семинарист")
+        try:
+            seminarist_start, seminarist_end = self.find_teacher_columns("Семинарист")
+        except Exception as e:
+            print(f"{e}")
+            return
+
         self.find_teachers_by_type("Семинарист")
 
         for name in self.seminarists:
             cur_seminarist = teacher.seminarist(self.sheet, seminarist_start, seminarist_end, name)
-            print(name)
             cur_seminarist.parse_marks()
-            cur_seminarist.print_marks()
-           # import pdb; pdb.set_trace()
+            #cur_seminarist.print_marks()
             i = 0
             for key, value in cur_seminarist.marks.items():    
                 graph_gen.generate_graph_numbers(value, self.total_answers, key, f"seminarists-marks-{name}-{i}")
+                i += 1
+
+    def parse_and_graph_labniks(self):
+        try:
+            labnik_start, labnik_end = self.find_teacher_columns("Преподаватель по лабораторным работам")
+        except Exception as e:
+            print(f"{e}")
+            return
+
+        self.find_teachers_by_type("Преподаватель по лабораторным работам")
+
+        for name in self.labniks:
+            cur_labnik = teacher.labnik(self.sheet, labnik_start, labnik_end, name)
+            cur_labnik.parse_marks()
+            #cur_labnik.print_marks()
+            i = 0
+            for key, value in cur_labnik.marks.items():    
+                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"labniks-marks-{name}-{i}")
                 i += 1
 
     def parse_teachers(self, teacher_type : str):
