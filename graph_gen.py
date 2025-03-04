@@ -18,13 +18,12 @@ def generate_graph_numbers(statistic : dict, total_amount : int, title : str, fi
 
     plt.figure(figsize=(16, 9)) 
     bars = plt.bar(categories, values, color = 'RoyalBlue', width = 0.5)
-    plt.axhline(y = total_amount, color = 'silver', linestyle = '--', label = 'Общее количество опрошенных')
-    plt.legend(loc = 'center right', bbox_to_anchor = (1, 0.9), fontsize = 14)
 
     # Добавление подписей к столбцам
     for bar in bars:
         height = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width() / 2, height + 1.5, f'{height}', ha = 'center', fontsize = 12, bbox = dict(facecolor = 'white', alpha = .3))
+        if height != 0:
+            plt.text(bar.get_x() + bar.get_width() / 2, height * 0.5 , f'{height}', ha = 'center', fontsize = 12, bbox = dict(facecolor = 'white', alpha = .3))
 
     # Настройки графика
     plt.title(title, fontsize = 14)
