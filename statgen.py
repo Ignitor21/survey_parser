@@ -71,13 +71,18 @@ class statgen:
             self.labniks = list(unique_teachers)
 
     def find_teacher_columns(self, teacher_type : str):
-        for i in range(self.first_column, self.end_column + 1):  # sheet[1] — первая строка
+        teacher_type_column = 0
+        comment_column = 0
+        for i in range(self.first_column, self.end_column + 1):# sheet[1] — первая строка
+            print(self.sheet.cell(1, i).value)
             if self.sheet.cell(1, i).value == teacher_type:
                 teacher_type_column = i  # Номер столбца
-            elif self.sheet.cell(1, i).value.startswith("Ваш комментарий о"):
+            elif self.sheet.cell(1, i).value.startswith("Ваш комментарий о") and teacher_type_column != 0:
                 comment_column = i  # Номер столбца
                 break
 
+        if (teacher_type_column == 0 or comment_column == 0):
+            raise Exception(f"Столбец {teacher_type} не найден")
         return teacher_type_column, comment_column
 
     def parse_and_graph_lecturers(self):
@@ -102,6 +107,20 @@ class statgen:
                 graph_gen.generate_graph_numbers(value, self.total_answers, key, f"{i}")
                 i += 1
 
+    def parse_and_graph_seminarists(self):
+        seminarist_start, seminarist_end = self.find_teacher_columns("Семинарист")
+        self.find_teachers_by_type("Семинарист")
+
+        i = 30
+        for name in self.seminarists:
+            cur_seminarist = teacher.seminarist(self.sheet, seminarist_start, seminarist_end, name)
+            print(name)
+            cur_seminarist.parse_marks()
+            cur_seminarist.print_marks()
+           # import pdb; pdb.set_trace()
+            for key, value in cur_seminarist.marks.items():    
+                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"{i}")
+                i += 1
 
     def parse_teachers(self, teacher_type : str):
         TEACHER_TYPES = ["Лектор", "Семинарист", "Преподаватель по лабораторным работам"]
