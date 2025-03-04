@@ -1,5 +1,7 @@
 import openpyxl
 from collections import defaultdict
+import graph_gen
+import teacher
 
 class statgen:
     def __init__(self, file_path: str, first_column : int, end_column : int):
@@ -10,6 +12,9 @@ class statgen:
         self.first_column = first_column
         self.end_column = end_column
         self.general = {}
+        self.lecturers = []
+        self.seminarists = []
+        self.labniks = [] 
 
     def get_statistic_in_column(self, column_number : int):
         value_counts = {}
@@ -39,14 +44,14 @@ class statgen:
             title, stat = self.get_statistic_in_column(i)
             for key, value in stat.items():
                 accum[key] = value
-        title = title.split('/')[0]
+        title = title.split(' / ')[0]
         self.general[title] = accum
    
-    def find_all_teachers(self, teacher_type : str):
+    def find_teachers_by_type(self, teacher_type : str):
         teacher_column = None
-        for cell in self.sheet[1]:  # Проходим по первой строке (заголовки)
-            if cell.value == teacher_type:
-                teacher_column = cell.column_letter  # Получаем букву столбца
+        for i in range(self.first_column, self.end_column + 1):  # Проходим по первой строке (заголовки)
+            if self.sheet.cell(1, i).value == teacher_type:
+                teacher_column = i  # Получаем букву столбца
                 break
 
         if teacher_column is None:
@@ -54,21 +59,48 @@ class statgen:
 
         # Сбор уникальных значений из столбца
         unique_teachers = set()
-        for row in self.sheet.iter_rows(min_row=2, min_col=cell.column, max_col=cell.column, values_only=True):
+        for row in self.sheet.iter_rows(min_row=2, min_col=teacher_column, max_col=teacher_column, values_only=True):
             if row[0]:  # Проверяем, что ячейка не пустая
                 unique_teachers.add(row[0])
 
-        return list(unique_teachers)
+        if teacher_type == "Лектор":
+            self.lecturers =  list(unique_teachers)
+        elif teacher_type == "Семинарист":
+            self.seminarists = list(unique_teachers)
+        elif teacher_type == "Преподаватель по лабораторным работам":
+            self.labniks = list(unique_teachers)
 
     def find_teacher_columns(self, teacher_type : str):
-        for cell in self.sheet[1]:  # sheet[1] — первая строка
-            if cell.value == teacher_type:
-                teacher_type_column = cell.column  # Номер столбца
-            elif cell.value.startswith("Ваш комментарий о"):
-                comment_column = cell.column  # Номер столбца
+        for i in range(self.first_column, self.end_column + 1):  # sheet[1] — первая строка
+            if self.sheet.cell(1, i).value == teacher_type:
+                teacher_type_column = i  # Номер столбца
+            elif self.sheet.cell(1, i).value.startswith("Ваш комментарий о"):
+                comment_column = i  # Номер столбца
                 break
 
         return teacher_type_column, comment_column
+
+    def parse_and_graph_lecturers(self):
+        lecturer_start, lecturer_end = self.find_teacher_columns("Лектор")
+        self.find_teachers_by_type("Лектор")
+
+        for name in self.lecturers:
+            cur_lecturer = teacher.lecturer(self.sheet, lecturer_start, lecturer_end, name)
+            print(name)
+            cur_lecturer.parse_marks()
+            cur_lecturer.parse_questions()
+            cur_lecturer.print_marks()
+            cur_lecturer.print_questions()
+            i = 10
+            #import pdb; pdb.set_trace()
+            for key, value in cur_lecturer.marks.items(): 
+                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"{i}")
+                i += 1
+
+            i = 20
+            for key, value in cur_lecturer.questions.items():    
+                graph_gen.generate_graph_numbers(value, self.total_answers, key, f"{i}")
+                i += 1
 
 
     def parse_teachers(self, teacher_type : str):
