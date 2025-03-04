@@ -15,6 +15,7 @@ if __name__ == "__main__":
         
         stat_gen = statgen.statgen(file_name, start_column, end_column)
         
+        stat_gen.parse_and_graph_general()
         stat_gen.parse_and_graph_lecturers()
         stat_gen.parse_and_graph_seminarists()
         stat_gen.parse_and_graph_labniks()

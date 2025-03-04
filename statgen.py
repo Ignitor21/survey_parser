@@ -33,10 +33,28 @@ class statgen:
         sorted_value_counts = dict(sorted(value_counts.items()))
         return title, sorted_value_counts
 
-    def parse_columns(self, start_column_number : int, end_column_number : int):
-        for i in range(start_column_number, end_column_number + 1):
-            title, stat = self.get_statistic_in_column(i)
-            self.general[title] = stat
+    def parse_and_graph_general(self):
+        for column_index in range(self.first_column, self.end_column + 1):
+            question_answers = 0
+            cur_question = self.sheet.cell(1, column_index).value
+            title = " / Общее впечатление от курса" 
+            if cur_question.startswith(title):
+                title, stat = self.get_statistic_in_column(column_index)
+                self.general[title] = stat
+                break
+
+        for column_index in range(self.first_column, self.end_column + 1):
+            question_answers = 0
+            cur_question = self.sheet.cell(1, column_index).value
+            title = " / Оцените адекватность критерий оценивания" 
+            if cur_question.startswith(title):
+                title, stat = self.get_statistic_in_column(column_index)
+                self.general[title] = stat
+                break
+        i = 0
+        for key, value in self.general.items():
+            graph_gen.generate_graph_numbers(value, self.total_answers, key, f"general-{i}")
+            i += 1
 
     def parse_and_join_columns(self, start_column_number : int, end_column_number : int):
         accum = {}
