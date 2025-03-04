@@ -10,7 +10,6 @@ class teacher:
         self.name = name
         self.questions = {}
         self.marks = {}
-        self.comments = []
     
     def parse_questions_impl(self, question : str):
         pass
@@ -28,17 +27,20 @@ class lecturer(teacher):
 
         for column_index in range(self.start_column, self.end_column + 1):
             question_answers = 0
-            #import pdb; pdb.set_trace()
             cur_question = self.sheet.cell(1, column_index).value
-
-            if cur_question.startswith("Посещали ли Вы лекции?"):
+            title = "Посещали ли Вы лекции?"
+            if cur_question.startswith(title):
                 row_number = 2
                 for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):
-                    if (row[0] is not None) and (self.sheet.cell(row_number, self.start_column).value == self.name):
+                    cell_value = row[0]
+                    cur_lecturer_name = self.sheet.cell(row_number, self.start_column).value
+                    if (cell_value is not None) and (cur_lecturer_name == self.name):
                         question_answers += 1
                     row_number += 1
+                cur_question = cur_question.split(' / ')[1]
                 questions_statistic[cur_question] = question_answers
-        self.questions = questions_statistic
+        self.questions[title] = questions_statistic
+        import pdb; pdb.set_trace()
     
     def print_questions(self):
         for elem in self.questions:
@@ -50,14 +52,13 @@ class lecturer(teacher):
 
         for column_index in range(self.start_column, self.end_column + 1):
             question_answers = 0
-            #import pdb; pdb.set_trace()
             cur_question = self.sheet.cell(1, column_index).value
-
-            if cur_question.startswith("Оцените качество преподавания лекций"):
+            title = "Оцените качество преподавания лекций" 
+            if cur_question.startswith(title):
                 row_number = 2
                 for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):
-                    cur_lecturer_name = self.sheet.cell(row_number, self.start_column).value
                     cell_value = row[0]
+                    cur_lecturer_name = self.sheet.cell(row_number, self.start_column).value
                     if (cell_value is not None) and (cur_lecturer_name == self.name):
                         cell_value = int(cell_value)
                         if cell_value in questions_statistic:
@@ -66,27 +67,11 @@ class lecturer(teacher):
                             questions_statistic[cell_value] = 1
 
                     row_number += 1
+                cur_question = cur_question.split(' / ')[1]
                 self.marks[cur_question] = dict(sorted(questions_statistic.items()))
+            questions_statistic.clear()
 
     def print_marks(self):
         for elem in self.marks:
             print(f"{elem}\n{self.marks[elem]}\n")
 
-    def parse_comments(self):
-        questions_answers = []
-
-        column_index = self.end_column
-
-        row_number = 2
-        for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):
-            cur_lecturer_name = self.sheet.cell(row_number, self.start_column).value
-            cell_value = row[0]
-            if (cell_value is not None) and (cur_lecturer_name == self.name):
-                questions_answers.append(cell_value)
-                row_number += 1
-        self.comments = questions_answers
-
-    def print_comments(self):
-        for elem in self.comments:
-            print(f"{elem}\n")
-        
