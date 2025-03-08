@@ -115,8 +115,10 @@ class statgen:
             cur_lecturer = teacher.lecturer(self.sheet, lecturer_start, lecturer_end, name)
             cur_lecturer.parse_marks()
             cur_lecturer.parse_questions()
-            #cur_lecturer.print_marks()
-            #cur_lecturer.print_questions()
+            cur_lecturer.parse_comments()
+            cur_lecturer.print_comments()
+            # cur_lecturer.print_marks()
+            # cur_lecturer.print_questions()
             i = 0
             for key, value in cur_lecturer.marks.items(): 
                 graph_gen.generate_graph_numbers(value, self.total_answers, key, f"lecturer-marks-{name}-{i}")
@@ -139,7 +141,9 @@ class statgen:
         for name in self.seminarists:
             cur_seminarist = teacher.seminarist(self.sheet, seminarist_start, seminarist_end, name)
             cur_seminarist.parse_marks()
-            #cur_seminarist.print_marks()
+            # cur_seminarist.print_marks()
+            cur_seminarist.parse_comments()
+            cur_seminarist.print_comments()
             i = 0
             for key, value in cur_seminarist.marks.items():    
                 graph_gen.generate_graph_numbers(value, self.total_answers, key, f"seminarists-marks-{name}-{i}")
@@ -157,7 +161,9 @@ class statgen:
         for name in self.labniks:
             cur_labnik = teacher.labnik(self.sheet, labnik_start, labnik_end, name)
             cur_labnik.parse_marks()
-            #cur_labnik.print_marks()
+            cur_labnik.parse_comments()
+            cur_labnik.print_comments()
+            # cur_labnik.print_marks()
             i = 0
             for key, value in cur_labnik.marks.items():    
                 graph_gen.generate_graph_numbers(value, self.total_answers, key, f"labniks-marks-{name}-{i}")

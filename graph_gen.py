@@ -37,7 +37,7 @@ def generate_graph_numbers(statistic : dict, total_amount : int, title : str, fi
     plt.close()  # Закрываем фигуру, чтобы освободить память
 
 
-#Test
+# Test
 # categories = ['Смотрел \n лекции', 'Посещал \n лекции', 'Посещал \n семинары', 'Читал \n литературу', 'Читал конспекты \n лекций лектора', 'Другое']
 # values = [38, 50, 65, 43, 43, 5]
 # statistic = dict(zip(categories, values))

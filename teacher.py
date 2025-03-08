@@ -10,6 +10,7 @@ class teacher:
         self.name = name
         self.questions = {}
         self.marks = {}
+        self.comments = []
     
     def parse_questions_impl(self, question : str):
         pass
@@ -70,9 +71,30 @@ class lecturer(teacher):
                 self.marks[cur_question] = dict(sorted(questions_statistic.items()))
             questions_statistic.clear()
 
+    def parse_comments(self):
+        column_index = self.end_column
+        
+        row_number = 2
+        for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):
+            cell_value = row[0]
+            cur_seminarist_name = self.sheet.cell(row_number, self.start_column).value
+            if (cell_value is not None) and (cur_seminarist_name == self.name):
+                self.comments.append(cell_value)
+            row_number += 1
+
     def print_marks(self):
         for elem in self.marks:
             print(f"{elem}\n{self.marks[elem]}\n")
+    
+    def print_comments(self):
+        file_name = 'txt/lecture_' + self.name + '.txt'
+        with open(file_name, 'w', encoding='utf-8') as file:
+            file.write(f"{self.name}\n")
+            i = 1
+            for elem in self.comments:
+                file.write(f"{{\n \t\\noindent \\textbf{{Комментарий №{i}.}} \\\\ \n \t{elem} \\\\ \n}}\n\n")
+                i = i + 1
+            file.write("=====================================================================================\n")
 
 class seminarist(teacher):
     def parse_marks(self):
@@ -100,9 +122,30 @@ class seminarist(teacher):
                 self.marks[cur_question] = dict(sorted(questions_statistic.items()))
             questions_statistic.clear()
 
+    def parse_comments(self):
+        column_index = self.end_column
+        
+        row_number = 2
+        for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):
+            cell_value = row[0]
+            cur_seminarist_name = self.sheet.cell(row_number, self.start_column).value
+            if (cell_value is not None) and (cur_seminarist_name == self.name):
+                self.comments.append(cell_value)
+            row_number += 1
+
     def print_marks(self):
         for elem in self.marks:
             print(f"{elem}\n{self.marks[elem]}\n")
+
+    def print_comments(self):
+        file_name = 'txt/seminarist_' + self.name + '.txt'
+        with open(file_name, 'w', encoding='utf-8') as file:
+            file.write(f"{self.name}\n")
+            i = 1
+            for elem in self.comments:
+                file.write(f"{{\n \t\\noindent \\textbf{{Комментарий №{i}.}} \\\\ \n \t{elem} \\\\ \n}}\n\n")
+                i = i + 1
+            file.write("=====================================================================================\n")
 
 class labnik(teacher):
     def parse_marks(self):
@@ -130,6 +173,27 @@ class labnik(teacher):
                 self.marks[cur_question] = dict(sorted(questions_statistic.items()))
             questions_statistic.clear()
 
+    def parse_comments(self):
+        column_index = self.end_column
+        
+        row_number = 2
+        for row in self.sheet.iter_rows(min_row=2, min_col=column_index, max_col=column_index, values_only=True):
+            cell_value = row[0]
+            cur_seminarist_name = self.sheet.cell(row_number, self.start_column).value
+            if (cell_value is not None) and (cur_seminarist_name == self.name):
+                self.comments.append(cell_value)
+            row_number += 1
+
     def print_marks(self):
         for elem in self.marks:
             print(f"{elem}\n{self.marks[elem]}\n")
+    
+    def print_comments(self):
+        file_name = 'txt/labnik_' + self.name + '.txt'
+        with open(file_name, 'w', encoding='utf-8') as file:
+            file.write(f"{self.name}\n")
+            i = 1
+            for elem in self.comments:
+                file.write(f"{{\n \t\\noindent \\textbf{{Комментарий №{i}.}} \\\\ \n \t{elem} \\\\ \n}}\n\n")
+                i = i + 1
+            file.write("=====================================================================================\n")
