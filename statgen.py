@@ -37,7 +37,7 @@ class statgen:
         for column_index in range(self.first_column, self.end_column + 1):
             question_answers = 0
             cur_question = self.sheet.cell(1, column_index).value
-            title = " / Общее впечатление от курса" 
+            title = "Общее впечатление от курса" 
             if cur_question.startswith(title):
                 title, stat = self.get_statistic_in_column(column_index)
                 self.general[title] = stat
@@ -46,7 +46,7 @@ class statgen:
         for column_index in range(self.first_column, self.end_column + 1):
             question_answers = 0
             cur_question = self.sheet.cell(1, column_index).value
-            title = " / Оцените адекватность критерий оценивания" 
+            title = "Оцените адекватность критерий оценивания" 
             if cur_question.startswith(title):
                 title, stat = self.get_statistic_in_column(column_index)
                 self.general[title] = stat
